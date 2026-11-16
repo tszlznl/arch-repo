@@ -13,27 +13,26 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Run Docker Arch Linux build
+      - name: Build packages script
         run: |
-          docker run --rm -v "$(pwd):/workspace" -w /workspace archlinux:base-devel bash -c '
+          docker run --rm -v "$GITHUB_WORKSPACE:/workspace" -w /workspace archlinux:base-devel bash -c "
             set -euo pipefail
             pacman-key --init
             pacman-key --populate archlinux
             pacman -Syu --noconfirm git go ffmpeg zstd libarchive sudo
 
             useradd -m builder
-            echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+            echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
             chown -R builder:builder /workspace
 
             mkdir -p /workspace/x86_64
             for pkg_dir in packages/*; do
-              if [ -d "$pkg_dir" ] && [ -f "$pkg_dir/PKGBUILD" ]; then
-                echo "Building: $pkg_dir"
-                su builder -c "cd /workspace/$pkg_dir && makepkg -s --noconfirm" || true
-                cp /workspace/$pkg_dir/*.pkg.tar.zst /workspace/x86_64/ || true
+              if [ -d \"\$pkg_dir\" ] && [ -f \"\$pkg_dir/PKGBUILD\" ]; then
+                echo \"Building: \$pkg_dir\"
+                su builder -c \"cd /workspace/\$pkg_dir && makepkg -s --noconfirm\" || true
+                cp /workspace/\$pkg_dir/*.pkg.tar.zst /workspace/x86_64/ || true
               fi
             done
 
@@ -41,37 +40,23 @@ jobs:
             repo-add tszlznl.db.tar.gz *.pkg.tar.zst
             cp tszlznl.db.tar.gz tszlznl.db
             cp tszlznl.files.tar.gz tszlznl.files
-          '
+          "
 
-      - name: Deploy to gh-pages branch
+      - name: Push to gh-pages branch
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-          rm -rf /tmp/deploy
           mkdir -p /tmp/deploy/x86_64
           cp -r x86_64/* /tmp/deploy/x86_64/
 
-          cat > /tmp/deploy/index.html << 'INDEXEOF'
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <title>tszlznl Arch Linux Repository</title>
-          </head>
-          <body>
-            <h1>tszlznl Personal Arch Linux Repository</h1>
-            <pre>[tszlznl]
-SigLevel = Optional TrustAll
-Server = https://tszlznl.github.io/arch-repo/$arch</pre>
-          </body>
-          </html>
-INDEXEOF
+          echo "<h1>tszlznl Personal Arch Linux Repository</h1>" > /tmp/deploy/index.html
+          echo "<pre>[tszlznl]\nSigLevel = Optional TrustAll\nServer = https://tszlznl.github.io/arch-repo/\$arch</pre>" >> /tmp/deploy/index.html
 
           git checkout --orphan gh-pages
           git rm -rf .
           cp -r /tmp/deploy/* .
           git add .
-          git commit -m "Deploy repository database and packages [skip ci]"
+          git commit -m "Deploy repository database and packages"
           git push --force origin gh-pages
