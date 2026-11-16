@@ -40,6 +40,10 @@ jobs:
             repo-add tszlznl.db.tar.gz *.pkg.tar.zst
           "
 
+      - name: Restore permissions for runner
+        run: |
+          sudo chown -R $USER:$USER "$GITHUB_WORKSPACE"
+
       - name: Push to gh-pages branch
         run: |
           git config --global user.name "github-actions[bot]"
