@@ -1,0 +1,28 @@
+# Maintainer: tszlznl
+pkgname=mygo-music-bin
+pkgver=0.1.25
+pkgrel=1
+pkgdesc="A native music player for your files and more"
+arch=('x86_64')
+url="https://github.com/egoist/mygo-music"
+license=('MIT')
+depends=('gtk3' 'fontconfig' 'freetype2' 'alsa-lib')
+options=('!strip')
+source=("https://github.com/egoist/mygo-music/releases/download/v${pkgver}/mygo-music-${pkgver}-linux-amd64.tar.gz")
+sha256sums=('SKIP')
+
+package() {
+    cd "${srcdir}"
+    install -d "${pkgdir}/usr/lib/mygo-music"
+    install -m755 mygo-music "${pkgdir}/usr/lib/mygo-music/mygo-music"
+
+    install -d "${pkgdir}/usr/bin"
+    ln -sf "/usr/lib/mygo-music/mygo-music" "${pkgdir}/usr/bin/mygo-music"
+
+    install -d "${pkgdir}/usr/share/icons/hicolor/512x512/apps"
+    install -Dm644 mygo-music.png "${pkgdir}/usr/share/icons/hicolor/512x512/apps/mygo-music.png"
+
+    install -d "${pkgdir}/usr/share/applications"
+    install -Dm644 mygo-music.desktop "${pkgdir}/usr/share/applications/mygo-music.desktop"
+    sed -i 's|^Exec=.*|Exec=/usr/bin/mygo-music %U|' "${pkgdir}/usr/share/applications/mygo-music.desktop"
+}

@@ -1,0 +1,43 @@
+# Maintainer: tszlznl
+pkgname=noir-bin
+pkgver=0.4.4
+pkgrel=1
+pkgdesc="NOIR - 手机隐私审计：用 adb 扫描手机应用隐私状态"
+arch=('x86_64')
+url="https://github.com/Verlintas/NOIR"
+license=('custom:freeware')
+depends=('android-tools' 'gtk3' 'nss' 'alsa-lib')
+options=('!strip')
+source=("https://github.com/Verlintas/NOIR/releases/download/v${pkgver}/noir-v${pkgver}-Linux-portable.zip")
+sha256sums=('SKIP')
+
+package() {
+    cd "${srcdir}"
+    install -d "${pkgdir}/usr/lib/noir"
+    cp -r NOIR/* "${pkgdir}/usr/lib/noir/"
+    chmod 755 "${pkgdir}/usr/lib/noir/bin/NOIR"
+
+    install -d "${pkgdir}/usr/bin"
+    cat << 'WRAPPER' > "${pkgdir}/usr/bin/noir"
+#!/bin/sh
+exec /usr/lib/noir/bin/NOIR "$@"
+WRAPPER
+    chmod 755 "${pkgdir}/usr/bin/noir"
+
+    # Install icon and desktop
+    if [ -f "${pkgdir}/usr/lib/noir/lib/NOIR.png" ]; then
+        install -Dm644 "${pkgdir}/usr/lib/noir/lib/NOIR.png" "${pkgdir}/usr/share/icons/hicolor/256x256/apps/noir.png"
+    fi
+
+    install -d "${pkgdir}/usr/share/applications"
+    cat << 'DESKTOP' > "${pkgdir}/usr/share/applications/noir.desktop"
+[Desktop Entry]
+Type=Application
+Name=NOIR
+Comment=手机隐私审计工具
+Exec=/usr/bin/noir
+Icon=noir
+Terminal=false
+Categories=Utility;Security;
+DESKTOP
+}
