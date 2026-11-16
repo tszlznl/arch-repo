@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-  schedule:
-    - cron: '0 3 * * *' # 每天凌晨 3:00 自动检查上游编译更新
   workflow_dispatch:
 
 permissions:
@@ -20,51 +18,48 @@ concurrency:
 jobs:
   build-packages:
     runs-on: ubuntu-latest
-    container:
-      image: archlinux:latest
-
     steps:
-      - name: Install build tools & dependencies
-        run: |
-          pacman -Syu --noconfirm base-devel git go ffmpeg bsdtar
-
-      - name: Setup non-root build user
-        run: |
-          useradd -m builder
-          echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set permissions
-        run: |
-          chown -R builder:builder .
+      - name: Build packages in Arch Linux container
+        uses: uraimo/run-on-arch-action@v2
+        with:
+          arch: x86_64
+          distro: archlinux:latest
+          githubToken: ${{ github.token }}
+          install: |
+            base-devel
+            git
+            go
+            ffmpeg
+            zstd
+            libarchive
+          run: |
+            useradd -m builder
+            echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+            chown -R builder:builder .
 
-      - name: Build all packages
-        run: |
-          mkdir -p x86_64
-          REPO_DIR="$(pwd)/x86_64"
+            mkdir -p x86_64
+            REPO_DIR="$(pwd)/x86_64"
 
-          for pkg_dir in packages/*; do
-            if [ -d "$pkg_dir" ] && [ -f "$pkg_dir/PKGBUILD" ]; then
-              echo "=========================================="
-              echo "Building package: $pkg_dir"
-              echo "=========================================="
-              su builder -c "cd '$pkg_dir' && makepkg -s --noconfirm"
-              cp $pkg_dir/*.pkg.tar.zst "$REPO_DIR/" || true
-            fi
-          done
+            for pkg_dir in packages/*; do
+              if [ -d "$pkg_dir" ] && [ -f "$pkg_dir/PKGBUILD" ]; then
+                echo "=========================================="
+                echo "Building package: $pkg_dir"
+                echo "=========================================="
+                su builder -c "cd '$pkg_dir' && makepkg -s --noconfirm"
+                cp $pkg_dir/*.pkg.tar.zst "$REPO_DIR/" || true
+              fi
+            done
 
-      - name: Create pacman repository database
-        run: |
-          cd x86_64
-          repo-add tszlznl.db.tar.gz *.pkg.tar.zst
-          # Remove symlinks or create standard fallbacks
-          cp tszlznl.db.tar.gz tszlznl.db
-          cp tszlznl.files.tar.gz tszlznl.files
-          cd ..
+            cd x86_64
+            repo-add tszlznl.db.tar.gz *.pkg.tar.zst
+            cp tszlznl.db.tar.gz tszlznl.db
+            cp tszlznl.files.tar.gz tszlznl.files
+            cd ..
 
-      - name: Create index.html for browser browsing
+      - name: Create index.html
         run: |
           cat > index.html << 'EOF'
           <!DOCTYPE html>
