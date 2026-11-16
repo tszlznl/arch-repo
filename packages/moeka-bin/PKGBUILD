@@ -1,0 +1,26 @@
+# Maintainer: tszlznl
+pkgname=moeka-bin
+pkgver=0.1.37
+pkgrel=1
+pkgdesc="小语文稿 - Moeka, elegant and high-performance Markdown editor built with Rust and GPUI"
+arch=('x86_64')
+url="https://moeka.app"
+license=('custom:freeware')
+depends=('fontconfig' 'freetype2' 'libxkbcommon' 'libx11' 'libxcb')
+options=('!strip')
+source=("https://github.com/MoekaProject/community/releases/download/v${pkgver}/Moeka-linux-x86_64.zip")
+sha256sums=('SKIP')
+
+package() {
+    cd "${srcdir}/Moeka-linux-x86_64"
+    install -d "${pkgdir}/usr/lib/moeka"
+    cp -r Moeka lib "${pkgdir}/usr/lib/moeka/"
+    chmod 755 "${pkgdir}/usr/lib/moeka/Moeka"
+
+    install -d "${pkgdir}/usr/bin"
+    ln -sf "/usr/lib/moeka/Moeka" "${pkgdir}/usr/bin/moeka"
+
+    install -Dm644 app.moeka.moeka.png "${pkgdir}/usr/share/icons/hicolor/512x512/apps/app.moeka.moeka.png"
+    install -Dm644 app.moeka.moeka.desktop "${pkgdir}/usr/share/applications/app.moeka.moeka.desktop"
+    sed -i 's|^Exec=.*|Exec=/usr/bin/moeka %F|' "${pkgdir}/usr/share/applications/app.moeka.moeka.desktop"
+}
