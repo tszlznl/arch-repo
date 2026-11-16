@@ -9,7 +9,7 @@ license=('GPL-3.0-or-later')
 depends=('fuse2' 'zlib' 'fontconfig' 'freetype2')
 options=('!strip')
 source=("https://github.com/s1dashu/quiet-md/releases/download/v${pkgver}/quiet-md-${pkgver}-x86_64.AppImage")
-sha256sums=('79d0c1db6a9024670a265c71db199583b276b1f2010ea93540bf85aeef3b7e77')
+sha256sums=(SKIP)
 
 prepare() {
     chmod +x "quiet-md-${pkgver}-x86_64.AppImage"

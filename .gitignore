@@ -1,0 +1,10 @@
+*.deb
+*.AppImage
+*.tar.gz
+*.tar.xz
+*.zip
+*.svg
+src/
+pkg/
+x86_64/
+*.pkg.tar.zst

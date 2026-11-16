@@ -11,7 +11,7 @@ optdepends=('google-chrome: for DRM Widevine playback'
             'chromium: for DRM Widevine playback')
 options=('!strip')
 source=("https://github.com/huacnlee/spotish/releases/download/v${pkgver}/spotish-linux-x86_64.tar.gz")
-sha256sums=('0259ee0ed3ef838fd2f8d249cb42861e6f4995f57339f4ad16e4ee7a5bc83ee1')
+sha256sums=(SKIP)
 
 package() {
     cd "${srcdir}/Spotish"

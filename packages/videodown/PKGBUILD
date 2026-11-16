@@ -10,7 +10,7 @@ license=('GPL-3.0-only')
 depends=('ffmpeg')
 makedepends=('git' 'go')
 source=("git+https://github.com/tszlznl/videodown.git#commit=${_commit}")
-sha256sums=('SKIP')
+sha256sums=(SKIP)
 
 prepare() {
     cd "${srcdir}/videodown"

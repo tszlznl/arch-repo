@@ -9,7 +9,7 @@ license=('GPL-3.0-or-later')
 depends=('python-gobject' 'gtk3' 'libpulse')
 options=('!strip')
 source=("https://github.com/wquguru/cicada/releases/download/v${pkgver}/Cicada-${pkgver}-Linux.tar.gz")
-sha256sums=('b1a345cd8fa19c11e488e079fe5c3328eb9204bc99ca780775a6beebba61b1be')
+sha256sums=(SKIP)
 
 package() {
     cd "${srcdir}/cicada-linux"

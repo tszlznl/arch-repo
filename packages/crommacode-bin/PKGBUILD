@@ -9,7 +9,7 @@ license=('custom:freeware')
 depends=('fuse2' 'zlib')
 options=('!strip')
 source=("https://dl.cromma.ai/code/stable/CrommaCode-linux-x86_64.AppImage")
-sha256sums=('SKIP')
+sha256sums=(SKIP)
 
 prepare() {
     chmod +x "CrommaCode-linux-x86_64.AppImage"
