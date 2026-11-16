@@ -44,21 +44,11 @@ jobs:
         run: |
           sudo chown -R $USER:$USER "$GITHUB_WORKSPACE"
 
-      - name: Push to gh-pages branch
+      - name: Create or Update GitHub Release for Pacman Repo
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-
-          mkdir -p /tmp/deploy/x86_64
-          cp -r x86_64/* /tmp/deploy/x86_64/
-
-          echo "<h1>tszlznl Personal Arch Linux Repository</h1>" > /tmp/deploy/index.html
-          echo "<pre>[tszlznl]\nSigLevel = Optional TrustAll\nServer = https://tszlznl.github.io/arch-repo/\$arch</pre>" >> /tmp/deploy/index.html
-
-          git checkout --orphan gh-pages
-          git rm -rf .
-          cp -r /tmp/deploy/* .
-          git add .
-          git commit -m "Deploy repository database and packages"
-          git push --force origin gh-pages
+          gh release delete repo -y --cleanup-tag 2>/dev/null || true
+          gh release create repo x86_64/* \
+            --title "tszlznl Arch Repository Database & Packages" \
+            --notes "Automated build of packages and repo database"
