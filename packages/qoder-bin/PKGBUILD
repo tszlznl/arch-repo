@@ -1,0 +1,26 @@
+# Maintainer: tszlznl
+pkgname=qoder-bin
+pkgver=0.5.12
+pkgrel=1
+pkgdesc="Intelligent coding assistant developed by Alibaba"
+arch=('x86_64')
+url="https://qoder.com.cn"
+license=('custom:proprietary')
+depends=('gtk3' 'nss' 'alsa-lib' 'libxss' 'libxtst')
+options=('!strip')
+source=("https://download.qoder.com.cn/qoder-app/releases/${pkgver}/Qoder-linux-amd64.deb")
+sha256sums=('SKIP')
+
+package() {
+    cd "${srcdir}"
+    bsdtar -xf data.tar.* -C "${pkgdir}/"
+
+    # Fix permissions and paths
+    install -d "${pkgdir}/usr/bin"
+    ln -sf "/opt/Qoder/qoder" "${pkgdir}/usr/bin/qoder"
+
+    # Update desktop file if present
+    if [ -f "${pkgdir}/usr/share/applications/qoder.desktop" ]; then
+        sed -i 's|^Exec=.*|Exec=/usr/bin/qoder --open-file %U|' "${pkgdir}/usr/share/applications/qoder.desktop"
+    fi
+}

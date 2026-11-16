@@ -1,0 +1,41 @@
+# Maintainer: tszlznl
+pkgname=alma-bin
+pkgver=0.4.709
+pkgrel=1
+pkgdesc="An AI agent desktop application"
+arch=('x86_64')
+url="https://alma.now"
+license=('custom:freeware')
+depends=('gtk3' 'nss' 'alsa-lib' 'libxss' 'hicolor-icon-theme')
+options=('!strip')
+source=("https://updates.alma.now/alma-${pkgver}-linux-x86_64.AppImage")
+sha256sums=('SKIP')
+
+package() {
+    cd "${srcdir}"
+    chmod +x "alma-${pkgver}-linux-x86_64.AppImage"
+    ./alma-${pkgver}-linux-x86_64.AppImage --appimage-extract >/dev/null
+
+    cd squashfs-root
+    install -d "${pkgdir}/usr/lib/alma"
+    cp -r * "${pkgdir}/usr/lib/alma/"
+    rm -rf "${pkgdir}/usr/lib/alma/AppRun"
+
+    install -d "${pkgdir}/usr/bin"
+    cat << 'WRAPPER' > "${pkgdir}/usr/bin/alma"
+#!/bin/sh
+exec /usr/lib/alma/alma "$@"
+WRAPPER
+    chmod 755 "${pkgdir}/usr/bin/alma"
+
+    # Install icons and desktop
+    if [ -f alma.desktop ]; then
+        install -Dm644 alma.desktop "${pkgdir}/usr/share/applications/alma.desktop"
+        sed -i 's|^Exec=.*|Exec=/usr/bin/alma %U|' "${pkgdir}/usr/share/applications/alma.desktop"
+    fi
+
+    if [ -d usr/share/icons ]; then
+        install -d "${pkgdir}/usr/share/icons"
+        cp -r usr/share/icons/* "${pkgdir}/usr/share/icons/"
+    fi
+}
