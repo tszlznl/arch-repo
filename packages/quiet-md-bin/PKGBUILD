@@ -1,0 +1,31 @@
+# Maintainer: tszlznl
+pkgname=quiet-md-bin
+pkgver=0.1.8
+pkgrel=1
+pkgdesc="Fast and quiet local markdown note taking app built with Rust and GPUI"
+arch=('x86_64')
+url="https://quiet.md"
+license=('GPL-3.0-or-later')
+depends=('fuse2' 'zlib' 'fontconfig' 'freetype2')
+options=('!strip')
+source=("https://github.com/s1dashu/quiet-md/releases/download/v${pkgver}/quiet-md-${pkgver}-x86_64.AppImage")
+sha256sums=('79d0c1db6a9024670a265c71db199583b276b1f2010ea93540bf85aeef3b7e77')
+
+prepare() {
+    chmod +x "quiet-md-${pkgver}-x86_64.AppImage"
+    ./quiet-md-${pkgver}-x86_64.AppImage --appimage-extract
+}
+
+package() {
+    install -Dm755 "quiet-md-${pkgver}-x86_64.AppImage" "${pkgdir}/usr/lib/quiet-md/Quiet.AppImage"
+    
+    install -d "${pkgdir}/usr/bin"
+    ln -sf "/usr/lib/quiet-md/Quiet.AppImage" "${pkgdir}/usr/bin/quiet"
+    ln -sf "/usr/lib/quiet-md/Quiet.AppImage" "${pkgdir}/usr/bin/quiet-md"
+
+    install -Dm644 squashfs-root/com.s1dashu.quietmd.desktop "${pkgdir}/usr/share/applications/com.s1dashu.quietmd.desktop"
+    sed -i 's|^Exec=.*|Exec=/usr/bin/quiet %F|' "${pkgdir}/usr/share/applications/com.s1dashu.quietmd.desktop"
+    
+    install -Dm644 squashfs-root/usr/share/icons/hicolor/512x512/apps/com.s1dashu.quietmd.png \
+        "${pkgdir}/usr/share/icons/hicolor/512x512/apps/com.s1dashu.quietmd.png"
+}

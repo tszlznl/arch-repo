@@ -1,0 +1,22 @@
+# Maintainer: tszlznl
+pkgname=cindy-bin
+pkgver=0.1.137
+pkgrel=1
+pkgdesc="Consider it done. The open-source AI agent that works out of the box (Global Edition)"
+arch=('x86_64')
+url="https://github.com/makecindy/cindy"
+license=('Apache-2.0')
+depends=('gtk3' 'nss' 'alsa-lib')
+options=('!strip')
+source=("https://github.com/makecindy/cindy/releases/download/v${pkgver}/cindy-${pkgver}-linux-x64-global.deb")
+sha256sums=('863c62c414cbff31795528a2a4664539121d5162a8fc091c5e7b5e4070a83e0c')
+
+package() {
+    bsdtar -xOf "cindy-${pkgver}-linux-x64-global.deb" data.tar.zst | bsdtar -xf - -C "${pkgdir}"
+
+    install -d "${pkgdir}/usr/bin"
+    ln -sf "/usr/lib/cindy/Cindy" "${pkgdir}/usr/bin/cindy"
+
+    # Fix desktop file if needed
+    sed -i 's|^Exec=.*|Exec=/usr/bin/cindy %U|' "${pkgdir}/usr/share/applications/cindy.desktop" 2>/dev/null || true
+}

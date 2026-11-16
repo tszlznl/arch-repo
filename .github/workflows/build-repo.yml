@@ -1,0 +1,117 @@
+name: Build and Publish Arch Repository
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 3 * * *' # 每天凌晨 3:00 自动检查上游编译更新
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-packages:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+
+    steps:
+      - name: Install build tools & dependencies
+        run: |
+          pacman -Syu --noconfirm base-devel git go ffmpeg bsdtar
+
+      - name: Setup non-root build user
+        run: |
+          useradd -m builder
+          echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set permissions
+        run: |
+          chown -R builder:builder .
+
+      - name: Build all packages
+        run: |
+          mkdir -p x86_64
+          REPO_DIR="$(pwd)/x86_64"
+
+          for pkg_dir in packages/*; do
+            if [ -d "$pkg_dir" ] && [ -f "$pkg_dir/PKGBUILD" ]; then
+              echo "=========================================="
+              echo "Building package: $pkg_dir"
+              echo "=========================================="
+              su builder -c "cd '$pkg_dir' && makepkg -s --noconfirm"
+              cp $pkg_dir/*.pkg.tar.zst "$REPO_DIR/" || true
+            fi
+          done
+
+      - name: Create pacman repository database
+        run: |
+          cd x86_64
+          repo-add tszlznl.db.tar.gz *.pkg.tar.zst
+          # Remove symlinks or create standard fallbacks
+          cp tszlznl.db.tar.gz tszlznl.db
+          cp tszlznl.files.tar.gz tszlznl.files
+          cd ..
+
+      - name: Create index.html for browser browsing
+        run: |
+          cat > index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <title>tszlznl Arch Linux Repository</title>
+            <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; line-height: 1.6; }
+              code, pre { background: #f4f4f4; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+              pre { padding: 16px; overflow-x: auto; }
+            </style>
+          </head>
+          <body>
+            <h1>tszlznl's Personal Arch Linux Repository</h1>
+            <p>To use this repository on your Arch Linux / CachyOS / Manjaro system, add the following to <code>/etc/pacman.conf</code>:</p>
+            <pre>[tszlznl]
+SigLevel = Optional TrustAll
+Server = https://tszlznl.github.io/arch-repo/$arch</pre>
+            <p>Then run:</p>
+            <pre>sudo pacman -Syu</pre>
+            <h2>Available Packages</h2>
+            <ul>
+              <li><b>videodown</b>: Video downloader for Bilibili, Douyin, and YouTube</li>
+              <li><b>cindy-bin</b>: Consider it done. The open-source AI agent desktop client (Global)</li>
+              <li><b>quiet-md-bin</b>: Fast and quiet local markdown note taking app (GPUI)</li>
+              <li><b>spotish-bin</b>: Native Spotify desktop client built with NSH</li>
+              <li><b>cicada-bin</b>: Live subtitles, interpreting and AI meeting notes</li>
+              <li><b>denova-bin</b>: One-stop AI workbench for novel writing & role-playing</li>
+              <li><b>crommacode-bin</b>: Playful desktop terminal for AI coding agents</li>
+            </ul>
+          </body>
+          </html>
+          EOF
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build-packages
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,38 @@
+# Maintainer: tszlznl
+pkgname=spotish-bin
+pkgver=0.1.1
+pkgrel=1
+pkgdesc="An unofficial, lightweight native client for Spotify built with NSH"
+arch=('x86_64')
+url="https://github.com/huacnlee/spotish"
+license=('Apache-2.0')
+depends=('gtk4' 'webkitgtk-6.0')
+optdepends=('google-chrome: for DRM Widevine playback'
+            'chromium: for DRM Widevine playback')
+options=('!strip')
+source=("https://github.com/huacnlee/spotish/releases/download/v${pkgver}/spotish-linux-x86_64.tar.gz")
+sha256sums=('0259ee0ed3ef838fd2f8d249cb42861e6f4995f57339f4ad16e4ee7a5bc83ee1')
+
+package() {
+    cd "${srcdir}/Spotish"
+
+    install -d "${pkgdir}/usr/lib/spotish"
+    cp -rf * "${pkgdir}/usr/lib/spotish/"
+    chmod 755 "${pkgdir}/usr/lib/spotish/Spotish"
+
+    install -d "${pkgdir}/usr/bin"
+    ln -sf "/usr/lib/spotish/Spotish" "${pkgdir}/usr/bin/spotish"
+
+    install -d "${pkgdir}/usr/share/applications"
+    install -d "${pkgdir}/usr/share/icons/hicolor/512x512/apps"
+
+    for icon in *.png; do
+        [ -f "$icon" ] && install -Dm644 "$icon" "${pkgdir}/usr/share/icons/hicolor/512x512/apps/$icon"
+    done
+
+    for entry in *.desktop; do
+        if [ -f "$entry" ]; then
+            sed 's|^Exec=.*|Exec=/usr/bin/spotish|' "$entry" > "${pkgdir}/usr/share/applications/$entry"
+        fi
+    done
+}

@@ -1,0 +1,53 @@
+# Maintainer: tszlznl
+pkgname=videodown
+pkgver=1.0.0.alpha.4
+_commit=30d44aa90fd21bf12f316790d9dfadbec07691bd
+pkgrel=1
+pkgdesc="A high-performance video downloader for Bilibili, Douyin, and YouTube built with Go, MyGo and MujicaUI"
+arch=('x86_64')
+url="https://github.com/tszlznl/videodown"
+license=('GPL-3.0-only')
+depends=('ffmpeg')
+makedepends=('git' 'go')
+source=("git+https://github.com/tszlznl/videodown.git#commit=${_commit}")
+sha256sums=('SKIP')
+
+prepare() {
+    cd "${srcdir}/videodown"
+    mkdir -p build/bin
+}
+
+build() {
+    cd "${srcdir}/videodown"
+    export CGO_ENABLED=0
+    export GOFLAGS="-trimpath -modcacherw"
+    go build -o build/bin/videodown .
+}
+
+package() {
+    cd "${srcdir}/videodown"
+    install -Dm755 build/bin/videodown "${pkgdir}/usr/lib/videodown/videodown"
+    install -Dm644 build/appicon.png "${pkgdir}/usr/share/icons/hicolor/512x512/apps/videodown.png"
+
+    # Wrapper to store app data in user XDG directory by default
+    install -d "${pkgdir}/usr/bin"
+    cat > "${pkgdir}/usr/bin/videodown" << 'EOF'
+#!/bin/sh
+DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/videodown"
+mkdir -p "$DATA_DIR"
+exec /usr/lib/videodown/videodown -data "$DATA_DIR" "$@"
+EOF
+    chmod 755 "${pkgdir}/usr/bin/videodown"
+
+    install -Dm644 /dev/stdin "${pkgdir}/usr/share/applications/videodown.desktop" << 'EOF'
+[Desktop Entry]
+Type=Application
+Name=VideoDown
+Comment=Video downloader for Bilibili, Douyin, and YouTube
+Exec=videodown
+Icon=videodown
+Terminal=false
+Categories=Network;AudioVideo;Utility;
+StartupNotify=false
+EOF
+}

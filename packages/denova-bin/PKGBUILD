@@ -1,0 +1,36 @@
+# Maintainer: tszlznl
+pkgname=denova-bin
+pkgver=0.7.3
+pkgrel=1
+pkgdesc="One-stop AI workbench for novel writing and role-playing"
+arch=('x86_64')
+url="https://denova-ai.com"
+license=('Apache-2.0')
+options=('!strip')
+source=("https://github.com/alfredxw/denova/releases/download/v${pkgver}/denova-webui-v${pkgver}-linux-x64.tar.gz"
+        "https://denova-ai.com/icon.svg")
+sha256sums=('b91a3a8aa791334fc32a245ee1e76559d873c9db6040845eb507a72d73ec2fcb'
+            'SKIP')
+
+package() {
+    install -d "${pkgdir}/usr/lib/denova"
+    cp -rf "${srcdir}/denova/"* "${pkgdir}/usr/lib/denova/"
+    chmod 755 "${pkgdir}/usr/lib/denova/denova"
+
+    install -d "${pkgdir}/usr/bin"
+    ln -sf "/usr/lib/denova/denova" "${pkgdir}/usr/bin/denova"
+
+    install -Dm644 "${srcdir}/icon.svg" "${pkgdir}/usr/share/icons/hicolor/scalable/apps/denova.svg"
+
+    install -Dm644 /dev/stdin "${pkgdir}/usr/share/applications/denova.desktop" << 'EOF'
+[Desktop Entry]
+Type=Application
+Name=Denova
+Comment=AI Novel Writing & Role-Playing Workbench
+Exec=/usr/bin/denova
+Icon=denova
+Terminal=false
+Categories=Office;Development;Utility;
+StartupNotify=false
+EOF
+}

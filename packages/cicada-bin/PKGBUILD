@@ -1,0 +1,32 @@
+# Maintainer: tszlznl
+pkgname=cicada-bin
+pkgver=1.8.0
+pkgrel=1
+pkgdesc="Live subtitles, interpreting and meeting notes for any call or stream"
+arch=('x86_64')
+url="https://github.com/wquguru/cicada"
+license=('GPL-3.0-or-later')
+depends=('python-gobject' 'gtk3' 'libpulse')
+options=('!strip')
+source=("https://github.com/wquguru/cicada/releases/download/v${pkgver}/Cicada-${pkgver}-Linux.tar.gz")
+sha256sums=('b1a345cd8fa19c11e488e079fe5c3328eb9204bc99ca780775a6beebba61b1be')
+
+package() {
+    cd "${srcdir}/cicada-linux"
+
+    install -d "${pkgdir}/usr/lib/cicada"
+    cp -R cicada lproj bin "${pkgdir}/usr/lib/cicada/"
+    [ -f sample.wav ] && cp sample.wav "${pkgdir}/usr/lib/cicada/"
+    for d in models lib; do
+        [ -d "$d" ] && cp -R "$d" "${pkgdir}/usr/lib/cicada/"
+    done
+    cp cicada.svg VERSION "${pkgdir}/usr/lib/cicada/"
+
+    install -d "${pkgdir}/usr/bin"
+    ln -sf "/usr/lib/cicada/bin/cicada" "${pkgdir}/usr/bin/cicada"
+
+    install -Dm644 cicada.svg "${pkgdir}/usr/share/icons/hicolor/scalable/apps/cicada.svg"
+
+    install -d "${pkgdir}/usr/share/applications"
+    sed "s|@BIN@|/usr/bin/cicada|" com.wquguru.cicada.desktop > "${pkgdir}/usr/share/applications/com.wquguru.cicada.desktop"
+}

@@ -1,0 +1,35 @@
+# Maintainer: tszlznl
+pkgname=crommacode-bin
+pkgver=0.2.14
+pkgrel=1
+pkgdesc="The playful desktop terminal for Claude Code and AI coding agents"
+arch=('x86_64')
+url="https://cromma.ai/code"
+license=('custom:freeware')
+depends=('fuse2' 'zlib')
+options=('!strip')
+source=("https://dl.cromma.ai/code/stable/CrommaCode-linux-x86_64.AppImage")
+sha256sums=('SKIP')
+
+prepare() {
+    chmod +x "CrommaCode-linux-x86_64.AppImage"
+    ./CrommaCode-linux-x86_64.AppImage --appimage-extract
+}
+
+package() {
+    install -Dm755 "CrommaCode-linux-x86_64.AppImage" "${pkgdir}/usr/lib/crommacode/CrommaCode.AppImage"
+
+    install -d "${pkgdir}/usr/bin"
+    ln -sf "/usr/lib/crommacode/CrommaCode.AppImage" "${pkgdir}/usr/bin/crommacode"
+    ln -sf "/usr/lib/crommacode/CrommaCode.AppImage" "${pkgdir}/usr/bin/cromma"
+    ln -sf "/usr/lib/crommacode/CrommaCode.AppImage" "${pkgdir}/usr/bin/cromma-bees"
+
+    if [ -f squashfs-root/usr/bin/bees ]; then
+        install -Dm755 squashfs-root/usr/bin/bees "${pkgdir}/usr/bin/bees"
+    fi
+
+    install -Dm644 squashfs-root/ai.cromma.bees.png "${pkgdir}/usr/share/icons/hicolor/512x512/apps/ai.cromma.bees.png"
+
+    install -Dm644 squashfs-root/ai.cromma.bees.desktop "${pkgdir}/usr/share/applications/ai.cromma.bees.desktop"
+    sed -i 's|^Exec=.*|Exec=/usr/bin/cromma-bees %U|' "${pkgdir}/usr/share/applications/ai.cromma.bees.desktop"
+}
