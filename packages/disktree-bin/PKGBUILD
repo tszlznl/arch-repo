@@ -1,0 +1,29 @@
+# Maintainer: tszlznl
+pkgname=disktree-bin
+pkgver=0.1.8
+pkgrel=1
+pkgdesc="Explore disk space with a native treemap"
+arch=('x86_64')
+url="https://github.com/huacnlee/disktree"
+license=('MIT')
+depends=('gtk3' 'fontconfig' 'freetype2' 'hicolor-icon-theme')
+options=('!strip')
+source=("https://github.com/huacnlee/disktree/releases/download/v${pkgver}/disktree-v${pkgver}-x86_64-unknown-linux-gnu.tar.gz")
+sha256sums=('SKIP')
+
+package() {
+    cd "${srcdir}"
+    install -d "${pkgdir}/usr/lib/disktree"
+    cp -r disktree nsh resources "${pkgdir}/usr/lib/disktree/"
+    chmod 755 "${pkgdir}/usr/lib/disktree/disktree"
+
+    install -d "${pkgdir}/usr/bin"
+    ln -sf "/usr/lib/disktree/disktree" "${pkgdir}/usr/bin/disktree"
+
+    install -d "${pkgdir}/usr/share/icons/hicolor/scalable/apps"
+    install -Dm644 resources/icon.svg "${pkgdir}/usr/share/icons/hicolor/scalable/apps/disktree.svg"
+
+    install -d "${pkgdir}/usr/share/applications"
+    install -Dm644 disktree.desktop "${pkgdir}/usr/share/applications/disktree.desktop"
+    sed -i 's|^Exec=.*|Exec=/usr/bin/disktree|' "${pkgdir}/usr/share/applications/disktree.desktop"
+}

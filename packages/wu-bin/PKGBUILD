@@ -1,0 +1,33 @@
+# Maintainer: tszlznl
+pkgname=wu-bin
+pkgver=1.3.0
+pkgrel=1
+pkgdesc="A high-performance code editor built on top of Zed"
+arch=('x86_64')
+url="https://github.com/dstrml/wu"
+license=('GPL-3.0-or-later')
+depends=('fontconfig' 'freetype2' 'libxkbcommon' 'libx11' 'libxcb' 'vulkan-driver')
+options=('!strip')
+source=("https://github.com/dstrml/wu/releases/download/v${pkgver}/wu-linux-x86_64.tar.gz")
+sha256sums=('SKIP')
+
+package() {
+    cd "${srcdir}/wu.app"
+    install -d "${pkgdir}/usr/lib/wu"
+    cp -r bin lib libexec "${pkgdir}/usr/lib/wu/"
+    chmod 755 "${pkgdir}/usr/lib/wu/bin/wu"
+
+    install -d "${pkgdir}/usr/bin"
+    ln -sf "/usr/lib/wu/bin/wu" "${pkgdir}/usr/bin/wu"
+
+    if [ -d share ]; then
+        install -d "${pkgdir}/usr/share"
+        cp -r share/* "${pkgdir}/usr/share/"
+    fi
+
+    # Fix desktop file Exec path
+    if [ -f "${pkgdir}/usr/share/applications/me.farshed.Wu.desktop" ]; then
+        sed -i 's|/home/heshui/\.local/wu\.app/bin/wu|/usr/bin/wu|g' "${pkgdir}/usr/share/applications/me.farshed.Wu.desktop"
+        sed -i 's|/home/heshui/\.local/wu\.app/share/icons/hicolor/512x512/apps/wu\.png|wu|g' "${pkgdir}/usr/share/applications/me.farshed.Wu.desktop"
+    fi
+}

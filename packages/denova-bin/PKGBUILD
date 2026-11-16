@@ -2,27 +2,36 @@
 pkgname=denova-bin
 pkgver=0.7.3
 pkgrel=1
-pkgdesc="One-stop AI workbench for novel writing and role-playing"
+pkgdesc="AI Novel Writing & Role-Playing Workbench (开源 AI 小说写作与角色扮演工具)"
 arch=('x86_64')
-url="https://denova-ai.com"
+url="https://github.com/alfredxw/denova"
 license=('Apache-2.0')
+depends=('glibc')
 options=('!strip')
-source=("https://github.com/alfredxw/denova/releases/download/v${pkgver}/denova-webui-v${pkgver}-linux-x64.tar.gz"
-        "https://denova-ai.com/icon.svg")
-sha256sums=('b91a3a8aa791334fc32a245ee1e76559d873c9db6040845eb507a72d73ec2fcb'
-            'SKIP')
+source=("https://github.com/alfredxw/denova/releases/download/v${pkgver}/denova-webui-v${pkgver}-linux-x64.tar.gz")
+sha256sums=('SKIP')
 
 package() {
+    cd "${srcdir}/denova"
     install -d "${pkgdir}/usr/lib/denova"
-    cp -rf "${srcdir}/denova/"* "${pkgdir}/usr/lib/denova/"
+    cp -r denova config.toml skills tools web "${pkgdir}/usr/lib/denova/" 2>/dev/null || cp -r * "${pkgdir}/usr/lib/denova/"
     chmod 755 "${pkgdir}/usr/lib/denova/denova"
 
     install -d "${pkgdir}/usr/bin"
-    ln -sf "/usr/lib/denova/denova" "${pkgdir}/usr/bin/denova"
+    # Create wrapper to set working dir or DENOVA_DIR if needed
+    cat << 'WRAPPER' > "${pkgdir}/usr/bin/denova"
+#!/bin/sh
+if [ -z "${DENOVA_DIR:-}" ]; then
+  DENOVA_DIR="$HOME/.denova"
+  export DENOVA_DIR
+fi
+exec /usr/lib/denova/denova "$@"
+WRAPPER
+    chmod 755 "${pkgdir}/usr/bin/denova"
 
-    install -Dm644 "${srcdir}/icon.svg" "${pkgdir}/usr/share/icons/hicolor/scalable/apps/denova.svg"
-
-    install -Dm644 /dev/stdin "${pkgdir}/usr/share/applications/denova.desktop" << 'EOF'
+    # Install desktop file
+    install -d "${pkgdir}/usr/share/applications"
+    cat << 'DESKTOP' > "${pkgdir}/usr/share/applications/denova.desktop"
 [Desktop Entry]
 Type=Application
 Name=Denova
@@ -31,6 +40,5 @@ Exec=/usr/bin/denova
 Icon=denova
 Terminal=false
 Categories=Office;Development;Utility;
-StartupNotify=false
-EOF
+DESKTOP
 }
