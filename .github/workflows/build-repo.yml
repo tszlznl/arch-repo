@@ -38,8 +38,6 @@ jobs:
 
             cd /workspace/x86_64
             repo-add tszlznl.db.tar.gz *.pkg.tar.zst
-            cp tszlznl.db.tar.gz tszlznl.db
-            cp tszlznl.files.tar.gz tszlznl.files
           "
 
       - name: Push to gh-pages branch
