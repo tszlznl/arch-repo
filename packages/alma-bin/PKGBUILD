@@ -1,6 +1,6 @@
 # Maintainer: tszlznl
 pkgname=alma-bin
-pkgver=0.4.709
+pkgver=0.4.866
 pkgrel=1
 pkgdesc="An AI agent desktop application"
 arch=('x86_64')

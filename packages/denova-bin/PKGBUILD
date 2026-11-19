@@ -1,6 +1,6 @@
 # Maintainer: tszlznl
 pkgname=denova-bin
-pkgver=0.7.3
+pkgver=0.8.0
 pkgrel=1
 pkgdesc="AI Novel Writing & Role-Playing Workbench (开源 AI 小说写作与角色扮演工具)"
 arch=('x86_64')
