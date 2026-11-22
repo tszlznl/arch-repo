@@ -1,6 +1,6 @@
 # Maintainer: tszlznl
 pkgname=wu-bin
-pkgver=1.3.0
+pkgver=1.5.0
 pkgrel=1
 pkgdesc="A high-performance code editor built on top of Zed"
 arch=('x86_64')

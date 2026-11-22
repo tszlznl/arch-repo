@@ -1,6 +1,6 @@
 # Maintainer: tszlznl
 pkgname=noir-bin
-pkgver=0.4.4
+pkgver=0.4.5
 pkgrel=1
 pkgdesc="NOIR - 手机隐私审计：用 adb 扫描手机应用隐私状态"
 arch=('x86_64')

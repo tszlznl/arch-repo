@@ -1,6 +1,6 @@
 # Maintainer: tszlznl
 pkgname=qoder-bin
-pkgver=0.5.14
+pkgver=0.5.17
 pkgrel=1
 pkgdesc="Intelligent coding assistant developed by Alibaba"
 arch=('x86_64')

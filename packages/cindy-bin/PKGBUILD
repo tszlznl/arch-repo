@@ -1,6 +1,6 @@
 # Maintainer: tszlznl
 pkgname=cindy-bin
-pkgver=0.1.141
+pkgver=0.1.143
 pkgrel=1
 pkgdesc="Consider it done. The open-source AI agent that works out of the box (Global Edition)"
 arch=('x86_64')
