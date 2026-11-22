@@ -1,0 +1,26 @@
+# Maintainer: tszlznl
+pkgname=browseros-bin
+pkgver=0.52.1.1
+pkgrel=1
+_tag=0.52.0
+pkgdesc="BrowserOS - open-source agentic browser that runs AI agents locally (Chromium based)"
+arch=('x86_64')
+url="https://www.browseros.com"
+license=('AGPL-3.0-only')
+depends=('alsa-lib' 'at-spi2-core' 'cairo' 'dbus' 'gdk-pixbuf2' 'glib2' 'gtk3'
+         'libcups' 'libdrm' 'libxcomposite' 'libxdamage' 'libxrandr' 'libxkbcommon'
+         'mesa' 'nspr' 'nss' 'pango' 'libx11' 'systemd-libs' 'expat' 'libxcb' 'hicolor-icon-theme')
+optdepends=('xdg-utils: open links with xdg-open'
+            'libnotify: desktop notifications')
+provides=('browseros' 'browserclaw')
+conflicts=('browseros' 'browserclaw' 'browseros-neo-bin')
+options=('!strip' '!emptydirs')
+source=("BrowserOS_neo_v${pkgver}_amd64.deb::https://github.com/browseros-ai/BrowserOS/releases/download/browserclaw/v${_tag}/BrowserOS_neo_v${pkgver}_amd64.deb")
+sha256sums=('d5ebe332d863768afb3c63995b092f6cab0db59290ac5859cbcc47ae001e6ada')
+noextract=("BrowserOS_neo_v${pkgver}_amd64.deb")
+
+package() {
+    bsdtar -xOf "BrowserOS_neo_v${pkgver}_amd64.deb" 'data.tar.zst' | bsdtar -xf - -C "${pkgdir}"
+    chmod 755 "${pkgdir}/usr/bin/browserclaw"
+    ln -s browserclaw "${pkgdir}/usr/bin/browseros"
+}
