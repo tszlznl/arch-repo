@@ -1,0 +1,18 @@
+# Maintainer: tszlznl
+pkgname=fluxdown
+pkgver=0.6.8
+pkgrel=1
+pkgdesc="Free IDM-alternative download manager"
+arch=('x86_64')
+url="https://fluxdown.com"
+license=('custom')
+depends=('gtk3' 'libayatana-appindicator' 'libxkbcommon' 'libxkbcommon-x11' 'wayland' 'libx11' 'vulkan-icd-loader' 'fontconfig' 'freetype2' 'alsa-lib' 'dbus' 'xdotool')
+optdepends=('xdg-utils: file and URL associations')
+options=('!strip')
+source=("https://github.com/zerx-lab/FluxDown/releases/download/v${pkgver}/FluxDown-${pkgver}-linux-x64.pkg.tar.zst")
+sha256sums=('SKIP')
+noextract=("FluxDown-${pkgver}-linux-x64.pkg.tar.zst")
+
+package() {
+    bsdtar -xf "FluxDown-${pkgver}-linux-x64.pkg.tar.zst" -C "${pkgdir}" --exclude='.PKGINFO' --exclude='.BUILDINFO' --exclude='.MTREE' --exclude='.INSTALL'
+}
