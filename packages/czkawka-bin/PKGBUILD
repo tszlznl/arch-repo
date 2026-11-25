@@ -1,0 +1,34 @@
+# Maintainer: tszlznl
+pkgname=czkawka-bin
+pkgver=12.0.2
+pkgrel=1
+pkgdesc="Multi functional app to find duplicates, empty folders, similar images etc. (with HEIF/RAW/AVIF support)"
+arch=('x86_64')
+url="https://github.com/qarmin/czkawka"
+license=('MIT')
+depends=('gtk4' 'libheif' 'libraw' 'libavif' 'ffmpeg')
+provides=('czkawka' 'czkawka-gui' 'czkawka-cli')
+conflicts=('czkawka' 'czkawka-gui-bin' 'czkawka-cli-bin')
+options=('!strip')
+source=(
+    "czkawka_gui-${pkgver}::https://github.com/qarmin/czkawka/releases/download/${pkgver}/linux_czkawka_gui_heif_raw_avif_x86_64"
+    "czkawka_cli-${pkgver}::https://github.com/qarmin/czkawka/releases/download/${pkgver}/linux_czkawka_cli_heif_raw_avif_x86_64"
+)
+sha256sums=('SKIP' 'SKIP')
+
+package() {
+    install -Dm755 "${srcdir}/czkawka_gui-${pkgver}" "${pkgdir}/usr/bin/czkawka_gui"
+    install -Dm755 "${srcdir}/czkawka_cli-${pkgver}" "${pkgdir}/usr/bin/czkawka_cli"
+
+    install -d "${pkgdir}/usr/share/applications"
+    cat << 'DESKTOP' > "${pkgdir}/usr/share/applications/czkawka.desktop"
+[Desktop Entry]
+Type=Application
+Name=Czkawka
+GenericName=Duplicate File Finder
+Comment=Multi functional app to find duplicates, empty folders, similar images etc.
+Exec=/usr/bin/czkawka_gui
+Terminal=false
+Categories=Utility;GTK;
+DESKTOP
+}
